@@ -44,7 +44,7 @@ public class PatternRecognition {
             return ResponseEntity.badRequest().body("N must be at least 2");
         }
         if (n > Space.points.size()) {
-            return ResponseEntity.badRequest().body("N cannot be greater than the number of points");
+            return ResponseEntity.badRequest().body("N cannot be greater than the number of points set");
         }
         return ResponseEntity.ok(Space.getLines(n));
     }

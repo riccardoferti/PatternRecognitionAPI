@@ -34,9 +34,13 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>3.4.3</version>
+                <configuration>
+                    <mainClass>org.example.PatternRecognition</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>
+
 
     <properties>
         <maven.compiler.source>23</maven.compiler.source>
