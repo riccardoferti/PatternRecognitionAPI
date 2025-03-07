@@ -1,18 +1,26 @@
 package org.example;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootApplication
 @RestController
+@Validated
 public class PatternRecognition {
     public static void main(String[] args) {
         SpringApplication.run(PatternRecognition.class, args);
@@ -49,6 +57,7 @@ public class PatternRecognition {
         return ResponseEntity.ok(Space.getLines(n));
     }
 }
+
 
 class Point {
     private int x;
@@ -112,33 +121,20 @@ class Space {
         Map<String, Set<Point>> lineMap = new HashMap<>();
 
         for (int i = 0; i < points.size(); i++) {
-            Map<String, Set<Point>> localMap = new HashMap<>();
             Point p1 = points.get(i);
 
             for (int j = i + 1; j < points.size(); j++) {
                 Point p2 = points.get(j);
                 String key = getLineKey(p1, p2);
 
-                localMap.putIfAbsent(key, new HashSet<>());
-                localMap.get(key).add(p1);
-                localMap.get(key).add(p2);
-            }
-
-            for (Map.Entry<String, Set<Point>> entry : localMap.entrySet()) {
-                lineMap.merge(entry.getKey(), entry.getValue(), (existing, newSet) -> {
-                    existing.addAll(newSet);
-                    return existing;
-                });
+                lineMap.computeIfAbsent(key, k -> new HashSet<>()).add(p1);
+                lineMap.get(key).add(p2);
             }
         }
 
-        List<Set<Point>> result = new ArrayList<>();
-        for (Set<Point> pointSet : lineMap.values()) {
-            if (pointSet.size() >= n) {
-                result.add(pointSet);
-            }
-        }
-        return result;
+        return lineMap.values().stream()
+                .filter(pointSet -> pointSet.size() >= n)
+                .collect(Collectors.toList());
     }
 
     static String getLineKey(Point p1, Point p2) {
